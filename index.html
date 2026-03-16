@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>aestetisk programmering</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/p5.js"></script>
+    <!-- <script src="js/addons/p5.sound.min.js"></script> -->
+    <script src="js/addons/cpx-serial.js"></script>
+</head>
+<body>
+    <div id="cpx-panel">
+    
+        <button id="connect-btn">Connect CPX</button>
+
+        <p>Temperature: <input type="text" id="val-temp" value="—" readonly /></p>
+        <p>Soil Moisture: <input type="text" id="val-moisture" value="—" readonly /></p>
+        <p>Soil Temp: <input type="text" id="val-soil-temp" value="—" readonly /></p>
+        <p>Light: <input type="text" id="val-light" value="—" readonly /></p>
+        <!-- <p>Sound: <input type="text" id="val-sound" value="—" readonly /></p> -->
+         
+        <p id="cpx-status">not connected</p>
+    </div>
+    <script src="sketch.js"></script>
+</body>
+
+</html>
