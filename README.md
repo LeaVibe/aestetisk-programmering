@@ -25,9 +25,8 @@ If not added to cpx: :
 - remember to import required library, run: 
 
 ```bash
-# soil sensor
 pip install circup
-circup install adafruit_seesaw adafruit_thermistor 
+circup install adafruit_seesaw adafruit_thermistor adafruit_sgp30
 
 
 

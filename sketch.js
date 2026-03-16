@@ -18,6 +18,8 @@ function setup() {
     document.getElementById("val-light").value     = data.light;
     document.getElementById("val-temp").value      = data.temp + " °C";
     // document.getElementById("val-sound").value     = "—"; // not in firmware
+    document.getElementById("val-tvoc").value      = data.tvoc + " ppb";
+    document.getElementById("val-eco2").value       = data.eco2 + " ppm";
   };
 
   btn.addEventListener("click", async () => {
