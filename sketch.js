@@ -23,9 +23,16 @@ function setup() {
 
   };
 
-  btn.addEventListener("click", async () => {
-    if (!cpx.connected) { await cpx.connect(); }
-    else                 { await cpx.disconnect(); }
+  btn.addEventListener("click", () => {
+    if (!cpx.connected) {
+      cpx.connect()
+        .then(() => { console.log("connect resolved"); })
+        .catch((e) => { status.textContent = "error: " + e.message; });
+    } else {
+      cpx.disconnect()
+        .then(() => { console.log("disconnect resolved"); })
+        .catch((e) => { status.textContent = "error: " + e.message; });
+    }
   });
 }
 
