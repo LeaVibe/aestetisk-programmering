@@ -165,6 +165,9 @@ class CPXSerial {
   }
 
   _dispatch(line) {
+    if (!line.startsWith("{")) return; // skip boot noise
+
+
     let obj;
     try {
       obj = JSON.parse(line);

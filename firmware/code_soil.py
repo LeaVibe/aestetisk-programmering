@@ -1,6 +1,7 @@
 # code.py - CPX + STEMMA Soil Sensor
-# Sends light, onboard temp, soil moisture, soil temp
+# Rename this file to code.py on CIRCUITPY
 # Hardware I2C on SCL/SDA pins
+# Libraries needed: adafruit_seesaw, adafruit_thermistor
 
 import board
 import time
@@ -15,34 +16,50 @@ import adafruit_seesaw.seesaw
 # pixels
 px = neopixel.NeoPixel(board.NEOPIXEL, 10, brightness=0.2, auto_write=False)
 
-# sensors
+# onboard sensors
 light = analogio.AnalogIn(board.LIGHT)
 therm = adafruit_thermistor.Thermistor(board.TEMPERATURE, 10000, 10000, 25, 3950)
 
 # soil sensor
-i2c  = busio.I2C(board.SCL, board.SDA)
-soil = adafruit_seesaw.seesaw.Seesaw(i2c, addr=0x36)
+soil = None
+try:
+    i2c  = busio.I2C(board.SCL, board.SDA)
+    soil = adafruit_seesaw.seesaw.Seesaw(i2c, addr=0x36)
+except Exception as e:
+    print("Soil sensor not found:", e)
 
+    
 # boot flash
 px.fill((0, 20, 0)); px.show()
 time.sleep(0.2)
 px.fill((0, 0, 0)); px.show()
 
-buf = ""
 t = time.monotonic()
 
 def handle(line):
     if "pixels_off" in line:
         px.fill((0, 0, 0)); px.show()
+    elif "pixels" in line:
+        try:
+            start = line.index("[[")
+            chunk = line[start+1:]
+            i = 0
+            while i < 10:
+                s = chunk.index("[")
+                e = chunk.index("]")
+                rgb = chunk[s+1:e].split(",")
+                px[i] = (int(rgb[0]), int(rgb[1]), int(rgb[2]))
+                chunk = chunk[e+1:]
+                i += 1
+            px.show()
+        except Exception:
+            pass
 
 while True:
     if supervisor.runtime.serial_bytes_available:
-        buf += sys.stdin.read(supervisor.runtime.serial_bytes_available)
-        while "\n" in buf:
-            line, buf = buf.split("\n", 1)
-            line = line.strip()
-            if line:
-                handle(line)
+        line = sys.stdin.readline().strip()
+        if line:
+            handle(line)
 
     now = time.monotonic()
     if now - t >= 0.2:
