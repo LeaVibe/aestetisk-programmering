@@ -23,10 +23,7 @@ function setup() {
     document.getElementById("val-eco2").value       = data.eco2 + " ppm";
 
     // insert example code here!
-     let r = Math.round(map(data.moisture, 200, 1500, 255, 0));
-     let b = Math.round(map(data.moisture, 200, 1500, 0, 255));
-     cpx.setPixels(Array(10).fill([r, 0, b]));
-
+    
   };
 
  
