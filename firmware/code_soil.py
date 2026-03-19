@@ -1,7 +1,9 @@
 # code.py - CPX + STEMMA Soil Sensor
 # Rename this file to code.py on CIRCUITPY
-# Hardware I2C on SCL/SDA pins
-# Libraries needed: adafruit_seesaw, adafruit_thermistor
+# Hardware I2C on SCL/SDA pins (green/white )
+
+
+# Remember to install libraries listed in readme 
 
 import board
 import time

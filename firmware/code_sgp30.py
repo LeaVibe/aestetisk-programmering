@@ -1,6 +1,11 @@
 # code.py - CPX + SGP30 gas sensor
 # Rename this file to code.py on CIRCUITPY
-# Hardware I2C on SCL/SDA pins
+# Remember to install libraries listed in readme 
+
+
+# Hardware I2C on SCL/SDA pins (yellow/blue)
+
+
 import board
 import time
 import sys
@@ -46,6 +51,24 @@ t = time.monotonic()
 def handle(line):
     if "pixels_off" in line:
         px.fill((0, 0, 0)); px.show()
+    elif "pixels" in line:
+        try:
+            start = line.index("[[")
+            chunk = line[start+1:]
+            i = 0
+            while i < 10:
+                s = chunk.index("[")
+                e = chunk.index("]")
+                rgb = chunk[s+1:e].split(",")
+                px[i] = (int(rgb[0]), int(rgb[1]), int(rgb[2]))
+                chunk = chunk[e+1:]
+                i += 1
+            px.show()
+        except Exception:
+            pass
+
+
+
 while True:
     if supervisor.runtime.serial_bytes_available:
         buf += sys.stdin.read(supervisor.runtime.serial_bytes_available)
