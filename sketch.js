@@ -1,97 +1,113 @@
-// let CO2_LIMIT = 1000; // ppm  //used for example below 
-let sensorBoard; // global variable to hold CPXSerial instance
+let sensorBoard;
+let latestData = null;
 
 function setup() {
-  noCanvas();
+  createCanvas(600, 400);
+  textFont("sans-serif");
+  textSize(16);
 
-  // Create CPXSerial instance and set up event handlers. 
   sensorBoard = new CPXSerial();
-  var btn    = document.getElementById("connect-btn");
-  var status = document.getElementById("cpx-status");
 
-  sensorBoard.onConnect = function() {
-    status.textContent = "connected ✓";
-    btn.textContent = "Disconnect";
+  const btn = document.getElementById("connect-btn");
+  const status = document.getElementById("cpx-status");
+
+  sensorBoard.onConnect = function () {
+    if (status) status.textContent = "connected ✓";
+    if (btn) btn.textContent = "Disconnect";
   };
 
-  sensorBoard.onDisconnect = function() {
-    status.textContent = "not connected";
-    btn.textContent = "Connect CPX";
+  sensorBoard.onDisconnect = function () {
+    if (status) status.textContent = "not connected";
+    if (btn) btn.textContent = "Connect CPX";
   };
 
-  sensorBoard.onError = function(e) {
-    status.textContent = "error: " + e.message;
+  sensorBoard.onError = function (e) {
+    if (status) status.textContent = "error: " + e.message;
+    console.error(e);
   };
 
-  // Example onSensors handler — replace with your own code!
-  sensorBoard.onSensors = function(data) {
-    document.getElementById("val-moisture").value  = data.moisture;
-    document.getElementById("val-soil-temp").value = data.soil_temp + " °C";
-    document.getElementById("val-light").value     = data.light;
-    document.getElementById("val-temp").value      = data.temp + " °C";
-    document.getElementById("val-tvoc").value      = data.tvoc + " ppb";
-    document.getElementById("val-eco2").value      = data.eco2 + " ppm";
-    // insert example code here!
+  sensorBoard.onSensors = function (data) {
+    latestData = data;
+
+    // Optional HTML output fields
+    setField("val-light", data.light);
+    setField("val-temp", data.temp + " °C");
+    setField("val-moisture", data.moisture);
+    setField("val-soil-temp", data.soil_temp + " °C");
+
+    // air quality sensor needs a little time to start up. You will not see values for the first ~30 seconds after connecting, but they should appear after that.
+    setField("val-tvoc", data.tvoc + " ppb");
+    setField("val-eco2", data.eco2 + " ppm");
+
+    
+    
   };
 
-  // Set up button to connect/disconnect when clicked
-  btn.addEventListener("click", function() {
-    if (!sensorBoard.connected) {
-      sensorBoard.connect()
-        .then(function() {
-          console.log("connect resolved");
-        })
-        .catch(function(e) {
-          status.textContent = "error: " + e.message;
+  if (btn) {
+    btn.addEventListener("click", function () {
+      if (!sensorBoard.connected) {
+        sensorBoard.connect().catch(function (e) {
+          if (status) status.textContent = "error: " + e.message;
         });
-    } else {
-      sensorBoard.disconnect()
-        .then(function() {
-          console.log("disconnect resolved");
-        })
-        .catch(function(e) {
-          status.textContent = "error: " + e.message;
+      } else {
+        sensorBoard.disconnect().catch(function (e) {
+          if (status) status.textContent = "error: " + e.message;
         });
-    }
-  });
+      }
+    });
+  }
 }
 
 function draw() {
-  // nothing to draw
+  background(240);
+
+  if (!latestData) {
+    fill(0);
+    text("Waiting for sensor data...", 20, 30);
+    return;
+  }
+
+  // Read values
+  let lightVal = latestData.light;
+  let airTemp = latestData.temp;
+  let moisture = latestData.moisture;
+  let soilTemp = latestData.soil_temp;
+  let tvoc = latestData.tvoc;
+  let eco2 = latestData.eco2;
+
+
+
+  // Map values to visuals
+  let bgBrightness = map(lightVal, 0, 255, 30, 255);
+  let mainSize = map(moisture, 200, 1500, 40, 220);
+  let mainY = map(soilTemp, 0, 35, height - 80, 100);
+  let circleColor = map(airTemp, 0, 35, 100, 255);
+
+  // Background responds to light
+  background(bgBrightness, bgBrightness, 255);
+
+  // Big circle responds to moisture + soil temp + air temp
+  noStroke();
+  fill(circleColor, 120, 180, 180);
+  circle(width / 2, mainY, mainSize);
+
+  // Smaller side circles respond to same values in simple ways
+  fill(100, 180, 255, 140);
+  circle(width / 2 - 120, height / 2, mainSize * 0.5);
+
+  fill(120, 255, 180, 140);
+  circle(width / 2 + 120, height / 2, map(lightVal, 0, 3000, 20, 120));
+ /*
+  // Labels
+  fill(0);
+  text("Temperature: " + airTemp + " °C", 20, 30);
+  text("Soil moisture: " + moisture, 20, 55);
+  text("Soil Temp: " + soilTemp + " °C", 20, 105);
+  text("Light: " + lightVal, 20, 30);
+  */
 }
 
-// ═══════════════════════════════════════════════════════════════════
-// EXAMPLES — paste content of function into the sensorBoard.onSensors above
-// ═══════════════════════════════════════════════════════════════════
-
-// ── EXAMPLE 1: Air quality pixels (SGP30) ──────────────────────────
-// Maps CO2 level to pixel colour: green = good, red = high CO2
-//
-// sensorBoard.onSensors = function(data) {
-//     var r = Math.round(map(data.eco2, 400, 2000, 0, 255));
-//     var g = Math.round(map(data.eco2, 400, 2000, 255, 0));
-//     sensorBoard.setPixels(Array(10).fill([r, g, 0]));
-// };
-
-// ── EXAMPLE 2: Threshold alert ─────────────────────────────────────
-// Pixels flash red when CO2 exceeds limit, off when under
-// Change CO2_LIMIT to whatever value makes sense
-//
-// var CO2_LIMIT = 1000; // ppm, OBS insert in global scope
-//
-// sensorBoard.onSensors = function(data) {
-//     if (data.eco2 > CO2_LIMIT) {
-//         sensorBoard.setPixels(Array(10).fill([255, 0, 0]));
-//     } else {
-//         sensorBoard.pixelsOff();
-//     }
-// };
-
-// ── EXAMPLE 3: Soil moisture pixels ───────────────────────────────
-// Maps moisture to pixel colour: red = dry, blue = wet
-//
-// sensorBoard.onSensors = function(data) {
-//     var r = Math.round(map(data.moisture, 200, 1500, 255, 0));
-//     var b = Math.round(map(data.moisture, 200, 1500, 0, 255));
-//     sensorBoard.setPixels(Array(10).fill([r, 0, b]));
-// };
+function setField(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.value = value;
+}
