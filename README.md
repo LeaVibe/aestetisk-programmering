@@ -1,8 +1,5 @@
 # aestetisk programmering
 
-## Getting Started
-
-Open `index.html` in your web browser and start editing `sketch.js`.
 
 ## Running Locally
 
@@ -28,7 +25,10 @@ If not added to cpx: :
 pip install circup
 circup install adafruit_seesaw adafruit_thermistor adafruit_sgp30
 
+```
+## Getting Started
 
+Open `index.html` in your web browser and start editing `sketch.js`.
 
 ## Resources
 - [p5.js 2.0](https://beta.p5js.org/)

@@ -84,7 +84,7 @@ function draw() {
   let circleColor = map(airTemp, 0, 35, 100, 255);
 
   // Background responds to light
-  background(bgBrightness, bgBrightness, 255);
+  background(bgBrightness, 100, 100);
 
   // Big circle responds to moisture + soil temp + air temp
   noStroke();
